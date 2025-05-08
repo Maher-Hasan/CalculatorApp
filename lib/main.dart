@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '/screens/calculator_screen.dart';
+//import 'package:flutter/rendering.dart';
 
 void main() {
+  // debugPaintSizeEnabled = true; // Enable debug paint for layout debugging
   runApp(const MyApp());
 }
 

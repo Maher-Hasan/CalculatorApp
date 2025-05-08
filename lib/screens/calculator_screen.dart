@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '/widgets/calculator_button.dart';
 import 'dart:math';
 
-
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
 
@@ -19,6 +18,9 @@ class CalculatorScreenState extends State<CalculatorScreen> {
   bool clearDisplay =
       false; //Flag to determine if the display should be cleared
   String formatDisplay(double number) {
+    if (!number.isFinite) {
+      return 'Error';
+    }
     if (number == number.toInt()) {
       return number.toInt().toString();
     } else {
@@ -26,41 +28,52 @@ class CalculatorScreenState extends State<CalculatorScreen> {
     }
   }
 
+  double memory = 0.0; // Variable to hold the memory value
+
   void onNumberPressed(String digit) {
     setState(() {
-      if (clearDisplay || displayText == '0') {
-        // If it's time to clear the display, replace it with the new digit
-        displayText = digit;
-        clearDisplay = false;
+      if (digit == '.') {
+        if (displayText.contains('.') && !clearDisplay) {
+          return; // Prevent multiple dots in the current number
+        } else if (clearDisplay) {
+          displayText = '0.'; // Start new number with "0."
+          clearDisplay = false;
+        } else {
+          displayText += '.'; // Append decimal point
+        }
       } else {
-        displayText += digit;
+        if (clearDisplay || displayText == '0') {
+          displayText = digit;
+          clearDisplay = false;
+        } else {
+          displayText += digit;
+        }
       }
+
       currentNumber = double.tryParse(displayText);
+
       if (previousNumber != null && operator != null) {
-        // Perform calculation if an operator was pressed before
         switch (operator) {
           case '+':
-            result = (previousNumber! + currentNumber!);
+            result = previousNumber! + currentNumber!;
             break;
           case '-':
-            result = (previousNumber! - currentNumber!);
+            result = previousNumber! - currentNumber!;
             break;
           case '/':
-            result = (previousNumber! / currentNumber!);
+            result = previousNumber! / currentNumber!;
             break;
           case 'x':
-            result = (previousNumber! * currentNumber!);
-            break;
-          default:
+            result = previousNumber! * currentNumber!;
             break;
         }
       }
-      clearDisplay = false; // Reset the flag when a number is pressed
-      print('Operator: $operator'); // Debugging line
-      print('Current Number: $currentNumber'); // Debugging line
-      print('previousNumber: $previousNumber'); // Debugging line
-      print('result: $result'); // Debugging line
-      print(clearDisplay); // Debugging line
+
+      // Debugging
+      print('Display: $displayText');
+      print('Current: $currentNumber');
+      print('Prev: $previousNumber');
+      print('Result: $result');
     });
   }
 
@@ -95,11 +108,13 @@ class CalculatorScreenState extends State<CalculatorScreen> {
             ); // Reset display if no previous number
       }
       clearDisplay = true; // So next number input will replace display
-      print('Operator: $operator'); // Debugging line
-      print('Current Number: $currentNumber'); // Debugging line
-      print('previousNumber: $previousNumber'); // Debugging line
-      print('result: $result'); // Debugging line
-      print(clearDisplay); // Debugging line
+      // Debugging
+      print('Operator: $operator');
+      print('Current Number: $currentNumber');
+      print('previousNumber: $previousNumber');
+      print('result: $result');
+      print(clearDisplay);
+      print('Memory: $memory');
     });
   }
 
@@ -114,6 +129,7 @@ class CalculatorScreenState extends State<CalculatorScreen> {
       print('previousNumber: $previousNumber');
       print('result: $result');
       print(clearDisplay);
+      print('Memory: $memory');
     });
   }
 
@@ -131,34 +147,96 @@ class CalculatorScreenState extends State<CalculatorScreen> {
       print('previousNumber: $previousNumber');
       print('result: $result');
       print(clearDisplay);
+      print('Memory: $memory');
     });
   }
 
   void onSqrtPressed() {
-  setState(() {
-    double? num = double.tryParse(displayText);
-    if (num != null && num >= 0) {
-      result = double.parse((sqrt(num)).toStringAsFixed(10));
-      displayText = formatDisplay(result!);
-      previousNumber = null;
-      currentNumber = result;
-      operator = null;
-      clearDisplay = true;
-    }
-  });
-}
+    setState(() {
+      double? num = double.tryParse(displayText);
+      if (num != null && num >= 0) {
+        result = double.parse((sqrt(num)).toStringAsFixed(10));
+        displayText = formatDisplay(result!);
+        previousNumber = null;
+        currentNumber = result;
+        operator = null;
+        clearDisplay = true;
+      }
+    });
+    print('Operator: $operator');
+    print('Current Number: $currentNumber');
+    print('previousNumber: $previousNumber');
+    print('result: $result');
+    print(clearDisplay);
+    print('Memory: $memory');
+  }
 
-void onToggleSignPressed() {
-  setState(() {
-    double? num = double.tryParse(displayText);
-    if (num != null) {
-      result = -num;
-      displayText = formatDisplay(result!);
-      currentNumber = result;
-      clearDisplay = false;
+  void onToggleSignPressed() {
+    setState(() {
+      double? num = double.tryParse(displayText);
+      if (num != null) {
+        result = -num;
+        displayText = formatDisplay(result!);
+        currentNumber = result;
+        clearDisplay = false;
+      }
+    });
+    print('Operator: $operator');
+    print('Current Number: $currentNumber');
+    print('previousNumber: $previousNumber');
+    print('result: $result');
+    print(clearDisplay);
+    print('Memory: $memory');
+  }
+
+  void onMemoryPlus() {
+    memory += double.tryParse(displayText) ?? 0.0;
+    // Debugging
+    print('Operator: $operator');
+    print('Current Number: $currentNumber');
+    print('previousNumber: $previousNumber');
+    print('result: $result');
+    print(clearDisplay);
+    print('Memory: $memory');
+  }
+
+  void onMemoryMinus() {
+    memory -= double.tryParse(displayText) ?? 0.0;
+    // Debugging
+    print('Operator: $operator');
+    print('Current Number: $currentNumber');
+    print('previousNumber: $previousNumber');
+    print('result: $result');
+    print(clearDisplay);
+    print('Memory: $memory');
+  }
+
+  void onMemoryRecall() {
+    displayText = memory.toString();
+    setState(() {});
+    // Debugging
+    print('Operator: $operator');
+    print('Current Number: $currentNumber');
+    print('previousNumber: $previousNumber');
+    print('result: $result');
+    print(clearDisplay);
+    print('Memory: $memory');
+  }
+
+  void onMemoryClear() {
+    if (displayText == memory.toString()) {
+      displayText = '0';
+      setState(() {});
     }
-  });
-}
+    memory = 0.0;
+    // Debugging
+    print('Operator: $operator');
+    print('Current Number: $currentNumber');
+    print('previousNumber: $previousNumber');
+    print('result: $result');
+    print(clearDisplay);
+    print('Memory: $memory');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -221,7 +299,21 @@ void onToggleSignPressed() {
                           ),
                         ],
                       ),
-                      child: Text(displayText, style: TextStyle(fontSize: 32)),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        reverse: true, // New digits appear on the right
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            displayText,
+                            style: TextStyle(
+                              fontSize: 38,
+                            ), // Start large, scale down
+                            overflow: TextOverflow.visible,
+                          ),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 10),
 
@@ -229,11 +321,26 @@ void onToggleSignPressed() {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        buildButton(label: 'MC', onPressed: () {}),
-                        buildButton(label: 'MR', onPressed: () {}),
-                        buildButton(label: 'M+', onPressed: () {}),
-                        buildButton(label: 'M-', onPressed: () {}),
-                        buildButton(label: '√', onPressed: () => onSqrtPressed()),
+                        buildButton(
+                          label: 'MC',
+                          onPressed: () => onMemoryClear(),
+                        ),
+                        buildButton(
+                          label: 'MR',
+                          onPressed: () => onMemoryRecall(),
+                        ),
+                        buildButton(
+                          label: 'M+',
+                          onPressed: () => onMemoryPlus(),
+                        ),
+                        buildButton(
+                          label: 'M-',
+                          onPressed: () => onMemoryMinus(),
+                        ),
+                        buildButton(
+                          label: '√',
+                          onPressed: () => onSqrtPressed(),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -315,10 +422,13 @@ void onToggleSignPressed() {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    Row( //test
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        buildButton(label: '+/-', onPressed: () => onToggleSignPressed()),
+                        buildButton(
+                          label: '+/-',
+                          onPressed: () => onToggleSignPressed(),
+                        ),
                         buildButton(
                           label: '0',
                           onPressed: () => onNumberPressed('0'),
